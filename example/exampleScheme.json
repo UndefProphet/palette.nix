@@ -1,0 +1,23 @@
+{
+  "name": "Example Scheme",
+  "author": "palette.nix (json)",
+  "variant": "dark",
+  "palette": {
+    "base00": "#7a0f04",
+    "base01": "#3bbb08",
+    "base02": "#38ffa6",
+    "base03": "#137e08",
+    "base04": "#58f68c",
+    "base05": "#62fcb4",
+    "base06": "#333ca7",
+    "base07": "#796f9c",
+    "base08": "#6e3f32",
+    "base09": "#13ffc3",
+    "base0A": "#3adf19",
+    "base0B": "#0efe94",
+    "base0C": "#0cbd58",
+    "base0D": "#16b620",
+    "base0E": "#46cb6c",
+    "base0F": "#577dcb"
+  }
+}
