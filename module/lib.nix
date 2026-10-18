@@ -29,6 +29,20 @@ lib.makeExtensible (
         }
       ));
 
+    loadNamed =
+      source:
+      source
+      |> (source: if builtins.isAttrs source then source else parseFromFile source)
+      |> (parsed: parsed.palette or parsed)
+      |> (lib.mapAttrs (_: toString)) # make sure the value is a string
+      |> (lib.mapAttrs (
+        colorName: hexcolor:
+        validateHexColor {
+          color = hexcolor;
+          name = colorName;
+        }
+      ));
+
     validateHexColor =
       {
         color,
@@ -49,7 +63,7 @@ lib.makeExtensible (
       source
       |> (source: if builtins.isAttrs source then source else parseFromFile source)
       |> (
-        colors:
+        meta:
         lib.filterAttrs (
           name: _:
           builtins.elem name [
@@ -57,9 +71,19 @@ lib.makeExtensible (
             "author"
             "name"
           ]
-        ) colors
+        ) meta
       )
       |> (lib.mapAttrs (_: toString)); # make sure the value is a string
+
+    buildMeta =
+      file:
+      let
+        metaInformation = loadMeta file;
+      in
+      {
+        author = metaInformation.author or null;
+        variant = if metaInformation ? variant then lib.toLower metaInformation.variant else null;
+      };
 
     # Produces a palette for each type of color expression with an opacity variant
     # Example:
@@ -76,15 +100,11 @@ lib.makeExtensible (
       {
         colors,
         opacity ? 1.0,
+        skipBaseCheck ? false,
       }:
       let
         # can be path to file or attrset of colors
-        metaInformation = loadMeta colors;
-        author = metaInformation.author or null;
-        variant = if metaInformation ? variant then lib.toLower metaInformation.variant else null;
-
-        # can be path to file or attrset of colors
-        hexColors = loadRawColors colors;
+        hexColors = if skipBaseCheck then loadNamed colors else loadRawColors colors;
 
         rgbComponents =
           hexColors
@@ -176,7 +196,6 @@ lib.makeExtensible (
       {
         hex = hexEntries;
         rgb = rgbEntries;
-        inherit author variant;
       };
 
   }

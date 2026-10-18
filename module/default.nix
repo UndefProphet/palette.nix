@@ -6,6 +6,7 @@
 }:
 let
   palette-lib = import ./lib.nix { inherit lib pkgs; };
+  cfg = config.palette;
 in
 {
   options.palette =
@@ -65,14 +66,26 @@ in
         readOnly = true;
         description = "Color palette in RGB format.";
       };
+
+      named = lib.mkOption {
+        type = types.attrsOf types.str;
+        description = "The assignment of palette.";
+
+        # Convert to a palette
+        apply =
+          value:
+          palette-lib.buildPalette {
+            colors = value;
+            opacity = cfg.opacity;
+            skipBaseCheck = true;
+          };
+      };
     };
 
-  config =
-    let
-      cfg = config.palette;
-    in
-    (lib.mkIf cfg.enable (
+  config = (
+    lib.mkIf cfg.enable (
       let
+        metaData = palette-lib.buildMeta cfg.colorscheme;
         paletteData = palette-lib.buildPalette {
           colors = cfg.colorscheme;
           opacity = cfg.opacity;
@@ -80,14 +93,16 @@ in
       in
       {
         palette = {
-          hex = paletteData.hex;
-          rgb = paletteData.rgb;
-          author = lib.mkDefault paletteData.author;
-          variant = lib.mkIf (builtins.elem paletteData.variant [
+          author = lib.mkDefault metaData.author;
+          variant = lib.mkIf (builtins.elem metaData.variant [
             "dark"
             "light"
-          ]) (lib.mkDefault paletteData.variant);
+          ]) (lib.mkDefault metaData.variant);
+
+          hex = paletteData.hex;
+          rgb = paletteData.rgb;
         };
       }
-    ));
+    )
+  );
 }
