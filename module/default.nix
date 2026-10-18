@@ -51,6 +51,7 @@ in
       opacity = lib.mkOption {
         type = types.float;
         default = 1.0;
+        description = "An opacity value between 0 and 1 (0 being fully transparent).";
       };
 
       hex = lib.mkOption {
