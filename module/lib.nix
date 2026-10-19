@@ -8,7 +8,11 @@ lib.makeExtensible (
   self: with self; {
 
     inherit (parsing) parseFromFile;
-    inherit (utility) toHexByte;
+    inherit (utility)
+      toHexByte
+      hexToRGB
+      RGBAToHex
+      ;
 
     # Constructs an attrset
     # {
@@ -106,37 +110,24 @@ lib.makeExtensible (
         # can be path to file or attrset of colors
         hexColors = if skipBaseCheck then loadNamed colors else loadRawColors colors;
 
-        rgbComponents =
-          hexColors
-          |> lib.mapAttrs (
-            _: hex:
-            let
-              # Convert hex color to 0-255 rgb values
-              clean = lib.removePrefix "#" hex;
-              r = lib.fromHexString (lib.substring 0 2 clean); # (00)0000
-              g = lib.fromHexString (lib.substring 2 2 clean); # 00(00)00
-              b = lib.fromHexString (lib.substring 4 2 clean); # 0000(00)
-            in
-            {
-              inherit r;
-              inherit g;
-              inherit b;
-            }
-          );
+        rgbComponents = hexColors |> lib.mapAttrs (_: hex: hexToRGB hex);
 
         hexWithAlpha =
           rgbComponents
           |> lib.mapAttrs (
             name: components:
-            let
-              # TODO: Fix by clamping
+            RGBAToHex {
+              r = components.r;
+              g = components.g;
+              b = components.b;
               a = builtins.floor (opacity * 255.0 + 0.5);
-            in
-            "#${toHexByte components.r}${toHexByte components.g}${toHexByte components.b}${toHexByte a}"
+            }
           );
+
         rgbString =
           rgbComponents
           |> lib.mapAttrs (name: comp: "rgb(${toString comp.r}, ${toString comp.g}, ${toString comp.b})");
+
         rgbaString =
           rgbComponents
           |> lib.mapAttrs (
@@ -158,8 +149,8 @@ lib.makeExtensible (
             {
               name = name;
               value = {
-                normal = normal;
-                withOpacity = withOpacity;
+                inherit normal;
+                inherit withOpacity;
                 opacity = toHexByte (builtins.floor (opacity * 255.0 + 0.5));
                 r = toHexByte components.r;
                 g = toHexByte components.g;
