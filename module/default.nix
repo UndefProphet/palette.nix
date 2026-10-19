@@ -90,17 +90,17 @@ in
           colors = cfg.colorscheme;
           opacity = cfg.opacity;
         };
+        variant = lib.mkIf (builtins.elem metaData.variant [
+          "dark"
+          "light"
+        ]) (lib.mkDefault metaData.variant);
       in
       {
         palette = {
           author = lib.mkDefault metaData.author;
-          variant = lib.mkIf (builtins.elem metaData.variant [
-            "dark"
-            "light"
-          ]) (lib.mkDefault metaData.variant);
-
-          hex = paletteData.hex;
-          rgb = paletteData.rgb;
+          inherit variant;
+          inherit (paletteData) hex;
+          inherit (paletteData) rgb;
         };
       }
     )
