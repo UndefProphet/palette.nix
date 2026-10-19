@@ -89,9 +89,21 @@ lib.makeExtensible (
         colorB_RGB = hexToRGB colorB;
 
         newColor_RGB = {
-          r = if colorB_RGB.r == 255 then 255 else lib.min 255 (builtins.floor (colorA_RGB.r * 255 / (255 - colorB_RGB.r)));
-          g = if colorB_RGB.g == 255 then 255 else lib.min 255 (builtins.floor (colorA_RGB.g * 255 / (255 - colorB_RGB.g)));
-          b = if colorB_RGB.b == 255 then 255 else lib.min 255 (builtins.floor (colorA_RGB.b * 255 / (255 - colorB_RGB.b)));
+          r =
+            if colorB_RGB.r == 255 then
+              255
+            else
+              lib.min 255 (builtins.floor (colorA_RGB.r * 255 / (255 - colorB_RGB.r)));
+          g =
+            if colorB_RGB.g == 255 then
+              255
+            else
+              lib.min 255 (builtins.floor (colorA_RGB.g * 255 / (255 - colorB_RGB.g)));
+          b =
+            if colorB_RGB.b == 255 then
+              255
+            else
+              lib.min 255 (builtins.floor (colorA_RGB.b * 255 / (255 - colorB_RGB.b)));
         };
 
         newColor = RGBToHex newColor_RGB;
@@ -108,9 +120,21 @@ lib.makeExtensible (
         colorB_RGB = hexToRGB colorB;
 
         newColor_RGB = {
-          r = if colorB_RGB.r == 0 then 0 else lib.max 0 (builtins.floor (255 - (255 - colorA_RGB.r) * 255 / colorB_RGB.r));
-          g = if colorB_RGB.g == 0 then 0 else lib.max 0 (builtins.floor (255 - (255 - colorA_RGB.g) * 255 / colorB_RGB.g));
-          b = if colorB_RGB.b == 0 then 0 else lib.max 0 (builtins.floor (255 - (255 - colorA_RGB.b) * 255 / colorB_RGB.b));
+          r =
+            if colorB_RGB.r == 0 then
+              0
+            else
+              lib.max 0 (builtins.floor (255 - (255 - colorA_RGB.r) * 255 / colorB_RGB.r));
+          g =
+            if colorB_RGB.g == 0 then
+              0
+            else
+              lib.max 0 (builtins.floor (255 - (255 - colorA_RGB.g) * 255 / colorB_RGB.g));
+          b =
+            if colorB_RGB.b == 0 then
+              0
+            else
+              lib.max 0 (builtins.floor (255 - (255 - colorA_RGB.b) * 255 / colorB_RGB.b));
         };
 
         newColor = RGBToHex newColor_RGB;

@@ -11,8 +11,8 @@ lib.makeExtensible (
         # Convert hex color to 0-255 rgb values
         cleanHex =
           if lib.stringLength hex != 7 then
-          throw "Hex color with alpha must have 7 characters, got ${hex}"
-        else
+            throw "Hex color with alpha must have 7 characters, got ${hex}"
+          else
             (lib.removePrefix "#" hex);
 
         r = lib.fromHexString (lib.substring 0 2 cleanHex); # (00)0000
@@ -31,8 +31,8 @@ lib.makeExtensible (
       let
         cleanHex =
           if lib.stringLength hex != 9 then
-          throw "Hex color with alpha must have 9 characters, got ${hex}"
-        else
+            throw "Hex color with alpha must have 9 characters, got ${hex}"
+          else
             (lib.removePrefix "#" hex);
 
         r = lib.fromHexString (lib.substring 0 2 cleanHex); # (00)000AA
