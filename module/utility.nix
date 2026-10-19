@@ -9,10 +9,15 @@ lib.makeExtensible (
       hex:
       let
         # Convert hex color to 0-255 rgb values
-        clean = lib.removePrefix "#" hex;
-        r = lib.fromHexString (lib.substring 0 2 clean); # (00)0000
-        g = lib.fromHexString (lib.substring 2 2 clean); # 00(00)00
-        b = lib.fromHexString (lib.substring 4 2 clean); # 0000(00)
+        cleanHex =
+          if lib.stringLength hex != 7 then
+          throw "Hex color with alpha must have 7 characters, got ${hex}"
+        else
+            (lib.removePrefix "#" hex);
+
+        r = lib.fromHexString (lib.substring 0 2 cleanHex); # (00)0000
+        g = lib.fromHexString (lib.substring 2 2 cleanHex); # 00(00)00
+        b = lib.fromHexString (lib.substring 4 2 cleanHex); # 0000(00)
       in
       {
         inherit r;
@@ -20,14 +25,20 @@ lib.makeExtensible (
         inherit b;
       };
 
+    # Convert hex color to 0-255 rgba values
     hexToRGBA =
       hex:
       let
-        clean = lib.removePrefix "#" hex;
-        r = lib.fromHexString (lib.substring 0 2 clean); # (00)000AA
-        g = lib.fromHexString (lib.substring 2 2 clean); # 00(00)00AA
-        b = lib.fromHexString (lib.substring 4 2 clean); # 0000(00)AA
-        a = lib.fromHexString (lib.substring 6 2 clean); # 000000(AA)
+        cleanHex =
+          if lib.stringLength hex != 9 then
+          throw "Hex color with alpha must have 9 characters, got ${hex}"
+        else
+            (lib.removePrefix "#" hex);
+
+        r = lib.fromHexString (lib.substring 0 2 cleanHex); # (00)000AA
+        g = lib.fromHexString (lib.substring 2 2 cleanHex); # 00(00)00AA
+        b = lib.fromHexString (lib.substring 4 2 cleanHex); # 0000(00)AA
+        a = lib.fromHexString (lib.substring 6 2 cleanHex); # 000000(AA)
       in
       {
         inherit r;
