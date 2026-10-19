@@ -7,6 +7,7 @@
 let
   palette-lib = import ./lib.nix { inherit lib pkgs; };
   color-mixing = import ./color-mixing.nix { inherit lib; };
+  user-lib = import ./user-lib.nix { inherit lib config; };
   cfg = config.palette;
 in
 {
@@ -95,6 +96,9 @@ in
           screenMix
           dodge
           burn
+          ;
+        inherit (user-lib)
+          getBase
           ;
       };
     }
