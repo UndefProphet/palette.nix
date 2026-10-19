@@ -57,16 +57,18 @@ in
         description = "An opacity value between 0 and 1 (0 being fully transparent).";
       };
 
-      hex = lib.mkOption {
-        type = types.attrsOf types.anything;
-        readOnly = true;
-        description = "Color palette in hex format.";
-      };
+      base = {
+        hex = lib.mkOption {
+          type = types.attrsOf types.anything;
+          readOnly = true;
+          description = "Color palette in hex format.";
+        };
 
-      rgb = lib.mkOption {
-        type = types.attrsOf types.anything;
-        readOnly = true;
-        description = "Color palette in RGB format.";
+        rgb = lib.mkOption {
+          type = types.attrsOf types.anything;
+          readOnly = true;
+          description = "Color palette in RGB format.";
+        };
       };
 
       named = lib.mkOption {
@@ -118,8 +120,10 @@ in
         palette = {
           author = lib.mkDefault metaData.author;
           inherit variant;
+          base = {
           inherit (paletteData) hex;
           inherit (paletteData) rgb;
+          };
         };
       }
     ))
