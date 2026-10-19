@@ -18,6 +18,8 @@ plain, with-opacity, and per-channel representation.
 - Produces both `hex` and `rgb` renderings of every color.
 - Every color exposes `normal`, `withOpacity`, `opacity`, `r`, `g`, and `b`.
 - Global `opacity` for generating translucent variants.
+- Pure color-mixing helpers (`tint`, `shade`, `multiplyMix`, `dodge`, `burn`, …)
+- see [Color mixing](./docs/color-mixing.md).
 
 ## Installation
 
@@ -100,6 +102,18 @@ Then read colors from anywhere in your config:
   # Metadata (from the scheme, unless overridden)
   theme.author = config.palette.author;
   theme.mode = config.palette.variant;
+}
+```
+
+### Recomended to use with - with palette!
+```nix
+{ config, ... }:
+with config.lib.palette;
+with config.palette.hex;
+{
+  # Mix a scheme color halfway towards white.
+  some.option = tint 0.5 base00.normal;
+  channels.r = base0D.r;             # "89"
 }
 ```
 
