@@ -6,6 +6,7 @@
 }:
 let
   palette-lib = import ./lib.nix { inherit lib pkgs; };
+  color-mixing = import ./color-mixing.nix { inherit lib; };
   cfg = config.palette;
 in
 {
@@ -82,8 +83,22 @@ in
       };
     };
 
-  config = (
-    lib.mkIf cfg.enable (
+  config = lib.mkMerge [
+    {
+      lib.palette = {
+        inherit (color-mixing)
+          linearMixRatio
+          evenMix
+          tint
+          shade
+          multiplyMix
+          screenMix
+          dodge
+          burn
+          ;
+      };
+    }
+    (lib.mkIf cfg.enable (
       let
         metaData = palette-lib.buildMeta cfg.colorscheme;
         paletteData = palette-lib.buildPalette {
@@ -103,6 +118,6 @@ in
           inherit (paletteData) rgb;
         };
       }
-    )
-  );
+    ))
+  ];
 }
