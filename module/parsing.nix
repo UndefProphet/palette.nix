@@ -17,10 +17,11 @@ lib.makeExtensible (self: {
   # Parsers
   fromYaml =
     path:
-    path
-    |> self.convertYamlFileToJsonFile
-    |> builtins.readFile
-    |> builtins.fromJSON;
+    lib.pipe path [
+      self.convertYamlFileToJsonFile
+      builtins.readFile
+      builtins.fromJSON
+    ];
 
   fromJson = path: builtins.fromJSON (builtins.readFile path);
   fromToml = path: builtins.fromTOML (builtins.readFile path);
@@ -35,22 +36,24 @@ lib.makeExtensible (self: {
   #
   fileExtensionFromPath =
     path:
-    path
-    |> toString
-    |> baseNameOf
-    |> (lib.splitString ".")
-    |> lib.last
-    |> lib.toLower;
+    lib.pipe path [
+      toString
+      baseNameOf
+      (lib.splitString ".")
+      lib.last
+      lib.toLower
+    ];
 
   parseFromFile =
     filePath:
-    filePath
-    |> self.fileExtensionFromPath
-    |> (
-      fileExtension:
-      self.fileParsers.${fileExtension}
-        or (throw "palette.nix: unsupported filetype '.${fileExtension}' in ${toString filePath}")
-    )
-    |> (parser: parser filePath);
+    lib.pipe filePath [
+      self.fileExtensionFromPath
+      (
+        fileExtension:
+        self.fileParsers.${fileExtension}
+          or (throw "palette.nix: unsupported filetype '.${fileExtension}' in ${toString filePath}")
+      )
+      (parser: parser filePath)
+    ];
 
 })

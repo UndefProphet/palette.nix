@@ -20,35 +20,37 @@ lib.makeExtensible (
     # }
     loadRawColors =
       source:
-      source
-      |> (source: if builtins.isAttrs source then source else parseFromFile source)
-      |> (parsed: parsed.palette or parsed)
-      |> (colors: lib.filterAttrs (name: _: lib.hasPrefix "base" (lib.toLower name)) colors)
-      # Formatting and validation
-      |> (lib.mapAttrs (_: toString)) # make sure the value is a string
-      |> lib.mapAttrs' (name: value: lib.nameValuePair (lib.toLower name) value)
-      |> (lib.mapAttrs (
-        colorName: hexcolor:
-        validateHexColor {
-          color = hexcolor;
-          name = colorName;
-        }
-      ));
+      lib.pipe source [
+        (source: if builtins.isAttrs source then source else parseFromFile source)
+        (parsed: parsed.palette or parsed)
+        (colors: lib.filterAttrs (name: _: lib.hasPrefix "base" (lib.toLower name)) colors)
+        #Formatting and validation
+        (lib.mapAttrs (_: toString)) # make sure the value is a string
+        (lib.mapAttrs' (name: value: lib.nameValuePair (lib.toLower name) value))
+        (lib.mapAttrs (
+          colorName: hexcolor:
+          validateHexColor {
+            color = hexcolor;
+            name = colorName;
+          }
+        ))
+      ];
 
     loadNamed =
       source:
-      source
-      |> (source: if builtins.isAttrs source then source else parseFromFile source)
-      |> (parsed: parsed.palette or parsed)
-      # Formatting and validation
-      |> (lib.mapAttrs (_: toString)) # make sure the value is a string
-      |> (lib.mapAttrs (
-        colorName: hexcolor:
-        validateHexColor {
-          color = hexcolor;
-          name = colorName;
-        }
-      ));
+      lib.pipe source [
+        (source: if builtins.isAttrs source then source else parseFromFile source)
+        (parsed: parsed.palette or parsed)
+        # Formatting and validation
+        (lib.mapAttrs (_: toString)) # make sure the value is a string
+        (lib.mapAttrs (
+          colorName: hexcolor:
+          validateHexColor {
+            color = hexcolor;
+            name = colorName;
+          }
+        ))
+      ];
 
     validateHexColor =
       {
@@ -67,20 +69,21 @@ lib.makeExtensible (
 
     loadMeta =
       source:
-      source
-      |> (source: if builtins.isAttrs source then source else parseFromFile source)
-      |> (
-        meta:
-        lib.filterAttrs (
-          name: _:
-          builtins.elem name [
-            "variant"
-            "author"
-            "name"
-          ]
-        ) meta
-      )
-      |> (lib.mapAttrs (_: toString)); # make sure the value is a string
+      lib.pipe source [
+        (source: if builtins.isAttrs source then source else parseFromFile source)
+        (
+          meta:
+          lib.filterAttrs (
+            name: _:
+            builtins.elem name [
+              "variant"
+              "author"
+              "name"
+            ]
+          ) meta
+        )
+        (lib.mapAttrs (_: toString)) # make sure the value is a string
+      ];
 
     buildMeta =
       file:
@@ -103,7 +106,7 @@ lib.makeExtensible (
         builtPalette = buildNamedPalette {
           colors = baseColors;
           inherit opacity;
-          };
+        };
       in
       {
         hex = builtPalette.hex;
