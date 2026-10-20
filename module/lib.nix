@@ -23,8 +23,10 @@ lib.makeExtensible (
       source
       |> (source: if builtins.isAttrs source then source else parseFromFile source)
       |> (parsed: parsed.palette or parsed)
-      |> (colors: lib.filterAttrs (name: _: lib.hasPrefix "base" name) colors)
+      |> (colors: lib.filterAttrs (name: _: lib.hasPrefix "base" (lib.toLower name)) colors)
+      # Formatting and validation
       |> (lib.mapAttrs (_: toString)) # make sure the value is a string
+      |> lib.mapAttrs' (name: value: lib.nameValuePair (lib.toLower name) value )
       |> (lib.mapAttrs (
         colorName: hexcolor:
         validateHexColor {
@@ -38,6 +40,7 @@ lib.makeExtensible (
       source
       |> (source: if builtins.isAttrs source then source else parseFromFile source)
       |> (parsed: parsed.palette or parsed)
+      # Formatting and validation
       |> (lib.mapAttrs (_: toString)) # make sure the value is a string
       |> (lib.mapAttrs (
         colorName: hexcolor:
