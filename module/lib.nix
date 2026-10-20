@@ -139,6 +139,7 @@ lib.makeExtensible (
           in
           {
             normal = color;
+            withoutHash = lib.removePrefix "#" color;
             withOpacity = RGBAToHex {
               inherit (colorRGB) r g b;
               a = alpha;
