@@ -10,9 +10,9 @@ lib.makeExtensible (self: {
     let
       color =
         if builtins.typeOf hexIndex == "string" then
-          config.palette.base.hex."base${hexIndex}".normal
+          config.palette.base.hex."base${lib.toLower hexIndex}".normal
         else if builtins.typeOf hexIndex == "int" then
-          config.palette.base.hex."base${lib.toUpper (utility.toHexByte hexIndex)}".normal
+          config.palette.base.hex."base${utility.toHexByte hexIndex}".normal
         else
           throw "Not a valid base type for index. Should be either string as hex value or an int. Got: ${builtins.typeOf hexIndex}";
     in

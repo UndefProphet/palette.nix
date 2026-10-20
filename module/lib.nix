@@ -26,7 +26,7 @@ lib.makeExtensible (
       |> (colors: lib.filterAttrs (name: _: lib.hasPrefix "base" (lib.toLower name)) colors)
       # Formatting and validation
       |> (lib.mapAttrs (_: toString)) # make sure the value is a string
-      |> lib.mapAttrs' (name: value: lib.nameValuePair (lib.toLower name) value )
+      |> lib.mapAttrs' (name: value: lib.nameValuePair (lib.toLower name) value)
       |> (lib.mapAttrs (
         colorName: hexcolor:
         validateHexColor {
@@ -92,104 +92,84 @@ lib.makeExtensible (
         variant = if metaInformation ? variant then lib.toLower metaInformation.variant else null;
       };
 
-    # Produces a palette for each type of color expression with an opacity variant
-    # Example:
-    # {
-    # hex = {
-    #   base<N> = {
-    #      normal = "#<hex>"
-    #      r = "11"
-    #      ...
-    #   };
-    #   rgb = { ... };
-    # }
     buildPalette =
       {
         colors,
         opacity ? 1.0,
-        skipBaseCheck ? false,
       }:
       let
         # can be path to file or attrset of colors
-        hexColors = if skipBaseCheck then loadNamed colors else loadRawColors colors;
+        baseColors = loadRawColors colors;
+        builtPalette = buildNamedPalette {
+          colors = baseColors;
+          inherit opacity;
+          };
+      in
+      {
+        hex = builtPalette.hex;
+        rgb = builtPalette.rgb;
+      };
 
-        rgbComponents = hexColors |> lib.mapAttrs (_: hex: hexToRGB hex);
+    buildNamedPalette =
+      {
+        colors,
+        opacity ? 1.0,
+      }:
+      let
+        alpha = builtins.floor (opacity * 255.0 + 0.5);
 
-        hexWithAlpha =
-          rgbComponents
-          |> lib.mapAttrs (
-            name: components:
-            RGBAToHex {
-              r = components.r;
-              g = components.g;
-              b = components.b;
-              a = builtins.floor (opacity * 255.0 + 0.5);
-            }
-          );
+        # Walk every nesting level, applying `f` to each hex string leaf.
+        walk =
+          f: set:
+          lib.mapAttrs (
+            name: value: if builtins.isAttrs value then walk f value else f name (toString value)
+          ) set;
 
-        rgbString =
-          rgbComponents
-          |> lib.mapAttrs (name: comp: "rgb(${toString comp.r}, ${toString comp.g}, ${toString comp.b})");
-
-        rgbaString =
-          rgbComponents
-          |> lib.mapAttrs (
-            name: comp: "rgba(${toString comp.r}, ${toString comp.g}, ${toString comp.b}, ${toString opacity})"
-          );
-
-        # Sort the name into a list [ "base00" "base01" ... ].
-        baseNames = lib.attrNames hexColors;
-
-        hexEntries =
-          baseNames
-          |> map (
-            name:
-            let
-              components = rgbComponents.${name};
-              normal = hexColors.${name};
-              withOpacity = hexWithAlpha.${name};
-            in
-            {
+        hexTree = walk (
+          name: hex:
+          let
+            color = validateHexColor {
+              color = hex;
               name = name;
-              value = {
-                inherit normal;
-                inherit withOpacity;
-                opacity = toHexByte (builtins.floor (opacity * 255.0 + 0.5));
-                r = toHexByte components.r;
-                g = toHexByte components.g;
-                b = toHexByte components.b;
-              };
-            }
-          )
-          |> lib.listToAttrs;
+            };
+            colorRGB = hexToRGB color;
+          in
+          {
+            normal = color;
+            withOpacity = RGBAToHex {
+              inherit (colorRGB) r g b;
+              a = alpha;
+            };
+            opacity = toHexByte alpha;
+            r = toHexByte colorRGB.r;
+            g = toHexByte colorRGB.g;
+            b = toHexByte colorRGB.b;
+          }
+        ) colors;
 
-        rgbEntries =
-          baseNames
-          |> map (
-            name:
-            let
-              comp = rgbComponents.${name};
-              normal = rgbString.${name};
-              withOpacity = rgbaString.${name};
-            in
-            {
+        rgbTree = walk (
+          name: hex:
+          let
+            color = validateHexColor {
+              color = hex;
               name = name;
-              value = {
-                normal = normal;
-                withOpacity = withOpacity;
-                opacity = toString opacity;
-                r = comp.r;
-                g = comp.g;
-                b = comp.b;
-              };
-            }
-          )
-          |> lib.listToAttrs;
+            };
+            colorRGB = hexToRGB color;
+          in
+          {
+            normal = "rgb(${toString colorRGB.r}, ${toString colorRGB.g}, ${toString colorRGB.b})";
+            withOpacity = "rgba(${toString colorRGB.r}, ${toString colorRGB.g}, ${toString colorRGB.b}, ${toString opacity})";
+            opacity = toString opacity;
+            r = colorRGB.r;
+            g = colorRGB.g;
+            b = colorRGB.b;
+          }
+        ) colors;
 
       in
       {
-        hex = hexEntries;
-        rgb = rgbEntries;
+        hex = hexTree;
+        rgb = rgbTree;
       };
 
   }

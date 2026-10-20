@@ -72,16 +72,15 @@ in
       };
 
       named = lib.mkOption {
-        type = types.attrsOf types.str;
+        type = types.attrsOf types.anything;
         description = "The assignment of palette.";
 
-        # Convert to a palette
+        # Convert to a palette. Colors may be nested into groups.
         apply =
           value:
-          palette-lib.buildPalette {
+          palette-lib.buildNamedPalette {
             colors = value;
             opacity = cfg.opacity;
-            skipBaseCheck = true;
           };
       };
     };
@@ -121,8 +120,8 @@ in
           author = lib.mkDefault metaData.author;
           inherit variant;
           base = {
-          inherit (paletteData) hex;
-          inherit (paletteData) rgb;
+            inherit (paletteData) hex;
+            inherit (paletteData) rgb;
           };
         };
       }
