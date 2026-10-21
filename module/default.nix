@@ -72,7 +72,14 @@ in
       };
 
       named = lib.mkOption {
-        type = types.attrsOf types.anything;
+        # A named color is a hex string. Named colors may be nested into
+        # groups of any depth, so a group is an attribute set of anything.
+        type = types.attrsOf (
+          types.oneOf [
+            types.str
+            (types.attrsOf types.anything)
+          ]
+        );
         description = "The assignment of palette.";
 
         # Convert to a palette. Colors may be nested into groups.
