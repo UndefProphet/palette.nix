@@ -124,9 +124,7 @@ lib.makeExtensible (
         # Walk every nesting level, applying `f` to each hex string leaf.
         walk =
           f: set:
-          lib.mapAttrs (
-            name: value: if builtins.isAttrs value then walk f value else f name (toString value)
-          ) set;
+          lib.mapAttrs (name: value: if builtins.isAttrs value then walk f value else f name value) set;
 
         hexTree = walk (
           name: hex:
