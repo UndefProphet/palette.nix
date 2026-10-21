@@ -31,7 +31,7 @@ in
               base0E = "#222222";
               base0F = "#222222";
             };
-          Or a YAML file containing the scheme, from which the `palette` is loaded:
+          Or a supported file containing the scheme, from which the `palette` is loaded:
             colorscheme = ./colorscheme.yaml
         '';
       };
