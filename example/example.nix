@@ -6,12 +6,12 @@
 }:
 {
   imports = [
-    inputs."palette.nix".nixosModules.default
+    inputs.palette-nix.nixosModules.default
   ];
 
   palette = with config.lib.palette; {
     enable = true;
-    colorscheme = ./black-metal-khold.yaml;
+    colorscheme = ./exampleScheme.yaml;
     opacity = 0.75;
 
     icons = {
@@ -22,7 +22,7 @@
         light = "Papirus-Light"; # Dark mode seems to not be used sometimes.
       };
 
-      secondTheme= {
+      secondTheme = {
         name = "Papirus Icon Theme";
         package = pkgs.papirus-icon-theme;
         dark = "Papirus-Light"; # Dark mode seems to not be used sometimes.
@@ -38,7 +38,7 @@
         size = 24;
       };
 
-      someOtherUsage= {
+      someOtherUsage = {
         package = pkgs.bibata-cursors;
         name = "Bibata-Modern-Classic";
         size = 24;
