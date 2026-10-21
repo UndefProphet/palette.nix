@@ -58,6 +58,11 @@ in
         description = "An opacity value between 0 and 1 (0 being fully transparent).";
       };
 
+      _startIncrementFromOneGetBase = lib.mkEnableOption {
+        default = false;
+        description = "Set 'getBase <int>' to start from 1 instead of 0.";
+      };
+
       baseColors = {
         hex = lib.mkOption {
           type = types.attrsOf types.anything;
