@@ -91,6 +91,99 @@ in
             opacity = cfg.opacity;
           };
       };
+
+      cursors = lib.mkOption {
+        type = types.attrsOf (
+          types.submodule {
+            options = {
+
+              package = lib.mkOption {
+                type = types.package;
+                description = "Crusor package.";
+              };
+
+              name = lib.mkOption {
+                type = types.str;
+                description = "Name of the cursor from the package.";
+              };
+
+              size = lib.mkOption {
+                type = types.number;
+                description = "The size of the cursor.";
+              };
+            };
+          }
+        );
+
+        default = { };
+        description = "Cursor definitions.";
+      };
+
+      icons = lib.mkOption {
+        type = types.attrsOf (
+          types.submodule {
+            options = {
+
+              package = lib.mkOption {
+                type = types.package;
+                description = "Icon package.";
+              };
+
+              name = lib.mkOption {
+                type = types.str;
+                description = "Name of the icon theme.";
+                default = "Not provided";
+              };
+
+              light = lib.mkOption {
+                type = types.str;
+                description = "Name of the icon theme for light icons in the icon theme.";
+              };
+
+              dark = lib.mkOption {
+                type = types.str;
+                description = "Name of the icon theme for dark icons in the icon theme.";
+              };
+
+            };
+          }
+        );
+
+        default = { };
+        description = "Icon definitions.";
+      };
+
+      fonts = lib.mkOption {
+        type = types.submodule {
+          options = {
+            sizes = lib.mkOption {
+              type = types.attrsOf types.float;
+              default = { };
+              description = "Named font sizes.";
+            };
+          };
+
+          freeformType = types.attrsOf (
+            types.submodule {
+              options = {
+                package = lib.mkOption {
+                  type = types.package;
+                  description = "Font package.";
+                };
+
+                name = lib.mkOption {
+                  type = types.str;
+                  description = "Font family name.";
+                };
+              };
+            }
+          );
+        };
+
+        default = { };
+        description = "Font definitions.";
+      };
+
     };
 
   config = lib.mkMerge [
