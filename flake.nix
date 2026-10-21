@@ -1,10 +1,6 @@
 {
   description = "A NixOS module that loads colorschemes and exposes their colors as different formats including with opacity";
 
-  inputs = {
-    nixpkgs.url = "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.zst";
-  };
-
   outputs =
     { nixpkgs, ... }:
     let
@@ -25,4 +21,8 @@
 
       formatter = forAllSystems (pkgs: pkgs.nixfmt-tree);
     };
+
+  inputs = {
+    nixpkgs.url = "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.zst";
+  };
 }
