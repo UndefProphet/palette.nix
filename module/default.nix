@@ -58,7 +58,7 @@ in
         description = "An opacity value between 0 and 1 (0 being fully transparent).";
       };
 
-      base = {
+      baseColors = {
         hex = lib.mkOption {
           type = types.attrsOf types.anything;
           readOnly = true;
@@ -72,7 +72,7 @@ in
         };
       };
 
-      named = lib.mkOption {
+      colors = lib.mkOption {
         # A named color is a hex string. Named colors may be nested into
         # groups of any depth, so a group is an attribute set of anything.
         type = types.attrsOf (
@@ -221,7 +221,7 @@ in
         palette = {
           author = lib.mkDefault metaData.author;
           inherit variant;
-          base = {
+          baseColors = {
             inherit (paletteData) hex;
             inherit (paletteData) rgb;
           };
