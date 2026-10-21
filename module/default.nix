@@ -46,6 +46,7 @@ in
         type = types.enum [
           "light"
           "dark"
+          "other"
         ];
         default = "light";
         description = "The color theme variant.";
@@ -120,6 +121,7 @@ in
         variant = lib.mkIf (builtins.elem metaData.variant [
           "dark"
           "light"
+          "other"
         ]) (lib.mkDefault metaData.variant);
       in
       {
