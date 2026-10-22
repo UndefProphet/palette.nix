@@ -22,8 +22,12 @@ in
         type = types.either (types.attrsOf types.str) (types.path);
         default = { };
         description = ''
-          Base16 (or any other base up to 255) colorscheme colors (attrs) or path to a colorscheme file
-          Example:
+          The colorscheme to load: either an attribute set of base00-baseFF
+          hex colors (Base16 or any other base up to 255), or a path to a
+          .yaml, .yml, .json or .toml colorscheme file.
+
+          Example attribute set:
+
             colorscheme = {
               base00 = "#222222";
               base01 = "#222222";
@@ -31,15 +35,20 @@ in
               base0E = "#222222";
               base0F = "#222222";
             };
-          Or a supported file containing the scheme, from which the `palette` is loaded:
-            colorscheme = ./colorscheme.yaml
+
+          Example file:
+
+            colorscheme = ./colorscheme.yaml;
         '';
       };
 
       author = lib.mkOption {
         type = types.nullOr types.str;
         default = null;
-        description = "The author of colorscheme.";
+        description = ''
+          Author of the colorscheme. Taken from the colorscheme's metadata
+          when available; set here to override.
+        '';
       };
 
       variant = lib.mkOption {
@@ -49,31 +58,49 @@ in
           "other"
         ];
         default = "light";
-        description = "The color theme variant.";
+        description = ''
+          Variant of the colorscheme. Taken from the colorscheme's metadata
+          when available (falling back to "light"); set here to override.
+        '';
       };
 
       opacity = lib.mkOption {
         type = types.float;
         default = 1.0;
-        description = "An opacity value between 0 and 1 (0 being fully transparent).";
+        description = ''
+          Opacity used for the withOpacity and opacity attributes of every
+          color, between 0 (fully transparent) and 1 (fully opaque).
+        '';
       };
 
       _startIncrementFromOneGetBase = lib.mkEnableOption {
         default = false;
-        description = "Set 'getBase <int>' to start from 1 instead of 0.";
+        description = ''
+          Make getBase <int> count scheme colors from 1 instead of 0, so
+          that getBase 1 yields base00. String lookups (getBase "00")
+          are unaffected.
+        '';
       };
 
       baseColors = {
         hex = lib.mkOption {
           type = types.attrsOf types.anything;
           readOnly = true;
-          description = "Color palette in hex format.";
+          description = ''
+            Read-only view of the colorscheme colors in hex format, with
+            normal, withoutHash, withOpacity, opacity, r, g and
+            b attributes on each color.
+          '';
         };
 
         rgb = lib.mkOption {
           type = types.attrsOf types.anything;
           readOnly = true;
-          description = "Color palette in RGB format.";
+          description = ''
+            Read-only view of the colorscheme colors in RGB format, with
+            normal, withOpacity, opacity, r, g and b attributes
+            on each color.
+          '';
         };
       };
 
@@ -86,7 +113,12 @@ in
             (types.attrsOf types.anything)
           ]
         );
-        description = "The assignment of palette.";
+        description = ''
+          Named colors declared by meaning, with hex string values
+          (#RRGGBB) or nested groups of any depth. Available read-only as
+          config.palette.colors in both hex and RGB trees, alongside the
+          scheme colors under config.palette.baseColors.
+        '';
 
         # Convert to a palette. Colors may be nested into groups.
         apply =
@@ -104,24 +136,27 @@ in
 
               package = lib.mkOption {
                 type = types.package;
-                description = "Crusor package.";
+                description = "Package providing the cursor theme.";
               };
 
               name = lib.mkOption {
                 type = types.str;
-                description = "Name of the cursor from the package.";
+                description = "Cursor theme name within the package.";
               };
 
               size = lib.mkOption {
                 type = types.number;
-                description = "The size of the cursor.";
+                description = "Cursor size.";
               };
             };
           }
         );
 
         default = { };
-        description = "Cursor definitions.";
+        description = ''
+          Cursor definitions, stored under the given names and readable back
+          via config.palette.cursors.<name>.
+        '';
       };
 
       icons = lib.mkOption {
@@ -131,23 +166,23 @@ in
 
               package = lib.mkOption {
                 type = types.package;
-                description = "Icon package.";
+                description = "Package providing the icon theme.";
               };
 
               name = lib.mkOption {
                 type = types.str;
-                description = "Name of the icon theme.";
+                description = "Icon theme name within the package.";
                 default = "Not provided";
               };
 
               light = lib.mkOption {
                 type = types.str;
-                description = "Name of the icon theme for light icons in the icon theme.";
+                description = "Icon theme name to use for light icons.";
               };
 
               dark = lib.mkOption {
                 type = types.str;
-                description = "Name of the icon theme for dark icons in the icon theme.";
+                description = "Icon theme name to use for dark icons.";
               };
 
             };
@@ -155,7 +190,10 @@ in
         );
 
         default = { };
-        description = "Icon definitions.";
+        description = ''
+          Icon theme definitions, stored under the given names and readable
+          back via config.palette.icons.<name>.
+        '';
       };
 
       fonts = lib.mkOption {
@@ -173,7 +211,7 @@ in
               options = {
                 package = lib.mkOption {
                   type = types.package;
-                  description = "Font package.";
+                  description = "Package providing the font.";
                 };
 
                 name = lib.mkOption {
@@ -186,7 +224,12 @@ in
         };
 
         default = { };
-        description = "Font definitions.";
+        description = ''
+          Font definitions: named fonts (each with a package and a font
+          family name) plus a sizes attribute set of named font sizes.
+          Readable back via config.palette.fonts.<name> and
+          config.palette.fonts.sizes.<name>.
+        '';
       };
 
     };
