@@ -124,7 +124,7 @@ in
         apply =
           value:
           palette-lib.buildNamedPalette {
-            colors = value;
+            nestedColors = value;
             opacity = cfg.opacity;
           };
       };

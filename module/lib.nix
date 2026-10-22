@@ -104,7 +104,7 @@ lib.makeExtensible (
         # can be path to file or attrset of colors
         baseColors = loadRawColors colors;
         builtPalette = buildNamedPalette {
-          colors = baseColors;
+          nestedColors = baseColors;
           inherit opacity;
         };
       in
@@ -115,7 +115,7 @@ lib.makeExtensible (
 
     buildNamedPalette =
       {
-        colors,
+        nestedColors,
         opacity ? 1.0,
       }:
       let
@@ -147,7 +147,7 @@ lib.makeExtensible (
             g = toHexByte colorRGB.g;
             b = toHexByte colorRGB.b;
           }
-        ) colors;
+        ) nestedColors;
 
         rgbTree = walk (
           name: hex:
@@ -166,7 +166,7 @@ lib.makeExtensible (
             g = colorRGB.g;
             b = colorRGB.b;
           }
-        ) colors;
+        ) nestedColors;
 
       in
       {
