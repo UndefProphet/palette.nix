@@ -49,5 +49,7 @@ anything else falls back to the default (`light`).
 
 - Only keys starting with `base` are used.
 - Names are lowercased, so a scheme's `base0D` is read as `base0d`.
-- Values must be `#RRGGBB`. Longer values are truncated to `#RRGGBB` with a
+- Values may be `#RRGGBB`, `RRGGBB`, `#RRGGBBAA` or `RRGGBBAA` (with or
+  without the leading `#`). When alpha is omitted it falls back to
+  `palette.opacity`. Longer values are truncated to 8 hex digits with a
   warning, shorter ones are rejected.
