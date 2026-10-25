@@ -32,6 +32,8 @@ formats and carries the same attributes:
 
 The values above assume `palette.opacity = 0.85`. The alpha channel is the
 opacity rounded to a byte, so it is `"ff"` at the default opacity of `1.0`.
+A color may carry its own alpha by writing it in `RRGGBBAA` form (with or
+without the leading `#`), which overrides `palette.opacity` for that color.
 
 Paths:
 

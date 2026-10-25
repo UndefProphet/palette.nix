@@ -1,8 +1,14 @@
 # Color mixing
 
-`config.lib.palette` ships pure color-mixing helpers. They take hex strings in
-`#RRGGBB` form and return a new `#RRGGBB` string; channels are combined as
-floats and truncated to integers, so a result is never rounded up.
+`config.lib.palette` ships pure color-mixing helpers. They accept any color
+format: a hex string in `#RRGGBB` or `RRGGBB` form (the leading `#` is
+optional), a hex attrset (`_type = "hex"`) or a rgb attrset
+(`_type = "rgb"`). They return a new color value: a rgb attrset
+(`_type = "rgb"`, with 0-255 integer channels and `a` taken from `colorB`);
+channels are
+combined as floats and truncated to integers, so a result is never rounded
+up. Because the result is a color value, it can be passed straight back
+into any other mixing function.
 
 ```nix
 { config, ... }:
@@ -15,14 +21,14 @@ with config.palette.baseColors.hex;
 
 | Function | Signature | Description |
 | --- | --- | --- |
-| `linearMixRatio` | `ratioB → colorA → colorB → hex` | Linear interpolation. `0` returns `colorA`, `1` returns `colorB`. |
-| `evenMix` | `colorA → colorB → hex` | Even 50/50 mix, shorthand for `linearMixRatio 0.5`. |
-| `tint` | `ratio → color → hex` | Mix a color towards white (`1` is white). |
-| `shade` | `ratio → color → hex` | Mix a color towards black (`1` is black). |
-| `multiplyMix` | `colorA → colorB → hex` | Multiplicative (subtractive) blend. |
-| `screenMix` | `colorA → colorB → hex` | Screen (additive) blend. |
-| `dodge` | `colorA → colorB → hex` | Color dodge; lightens `colorA` by `colorB`. |
-| `burn` | `colorA → colorB → hex` | Color burn; darkens `colorA` by `colorB`. |
+| `linearMixRatio` | `ratioB → colorA → colorB → color` | Linear interpolation. `0` returns `colorA`, `1` returns `colorB`. |
+| `evenMix` | `colorA → colorB → color` | Even 50/50 mix, shorthand for `linearMixRatio 0.5`. |
+| `tint` | `ratio → color → color` | Mix a color towards white (`0` is white, `1` is the color). |
+| `shade` | `ratio → color → color` | Mix a color towards black (`0` is black, `1` is the color). |
+| `multiplyMix` | `colorA → colorB → color` | Multiplicative (subtractive) blend. |
+| `screenMix` | `colorA → colorB → color` | Screen (additive) blend. |
+| `dodge` | `colorA → colorB → color` | Color dodge; lightens `colorA` by `colorB`. |
+| `burn` | `colorA → colorB → color` | Color burn; darkens `colorA` by `colorB`. |
 
 ## Examples
 
@@ -30,14 +36,14 @@ with config.palette.baseColors.hex;
 { config, ... }:
 with config.lib.palette;
 {
-  mixed = linearMixRatio 0.25 "#ff0000" "#0000ff";  # "#bf003f"
-  even = evenMix "#ff0000" "#0000ff";              # "#7f007f"
-  lighter = tint 0.5 "#808080";                    # "#bfbfbf"
-  darker = shade 0.5 "#808080";                    # "#404040"
-  multiplied = multiplyMix "#ff8000" "#8080ff";    # "#804000"
-  screened = screenMix "#ff8000" "#8080ff";        # "#ffc0ff"
-  dodged = dodge "#808080" "#404040";              # "#aaaaaa"
-  burned = burn "#808080" "#c0c0c0";               # "#575757"
+  mixed = linearMixRatio 0.25 "#ff0000" "#0000ff";  # rgb attrset: r = 191, g = 0, b = 63
+  even = evenMix "#ff0000" "#0000ff";               # r = 127, g = 0, b = 127
+  lighter = tint 0.5 "#808080";                     # r = 191, g = 191, b = 191
+  darker = shade 0.5 "#808080";                     # r = 64, g = 64, b = 64
+  multiplied = multiplyMix "#ff8000" "#8080ff";     # r = 128, g = 64, b = 0
+  screened = screenMix "#ff8000" "#8080ff";         # r = 255, g = 192, b = 255
+  dodged = dodge "#808080" "#404040";               # r = 170, g = 170, b = 170
+  burned = burn "#808080" "#c0c0c0";                # r = 87, g = 87, b = 87
 }
 ```
 

@@ -1,6 +1,6 @@
 { lib, config }:
 let
-  utility = import ./utility.nix { inherit lib; };
+  conversion = import ./color-conversion.nix { inherit lib; };
 in
 lib.makeExtensible (self: {
 
@@ -17,7 +17,7 @@ lib.makeExtensible (self: {
         else if builtins.typeOf hexIndex == "int" then
           let
             # Handle change of start position of index if set by user
-            hexByteIndex = utility.toHexByte (if incrementFromOne then (hexIndex - 1) else hexIndex);
+            hexByteIndex = conversion.intToHexByte (if incrementFromOne then (hexIndex - 1) else hexIndex);
           in
           config.palette.baseColors.hex."base${hexByteIndex}".normal
         else
