@@ -1,6 +1,6 @@
 { lib, pkgs }:
 let
-  utility = import ./utility.nix { inherit lib; };
+  formatConversion = import ./color-conversion.nix { inherit lib; };
   parsing = import ./parsing.nix { inherit lib pkgs; };
 
 in
@@ -8,64 +8,38 @@ lib.makeExtensible (
   self: with self; {
 
     inherit (parsing) parseFromFile;
-    inherit (utility)
-      toHexByte
-      hexToRGB
-      RGBAToHex
+    inherit (formatConversion)
+      hexStringToRGB
+      rgbValueToHex
+      hexValueToRGB
+      intToHexByte
+      hexOpacityToFloat
+      floatOpacityToHex
+      convertToColorFormat
       ;
 
     # Constructs an attrset
     # {
-    #   base<N> = "#<hex color>"
+    #   base<N> = { _type = "rgb"; ...}
     # }
-    loadRawColors =
+    loadBaseColors =
       source:
       lib.pipe source [
         (source: if builtins.isAttrs source then source else parseFromFile source)
         (parsed: parsed.palette or parsed)
         (colors: lib.filterAttrs (name: _: lib.hasPrefix "base" (lib.toLower name)) colors)
-        #Formatting and validation
         (lib.mapAttrs (_: toString)) # make sure the value is a string
         (lib.mapAttrs' (name: value: lib.nameValuePair (lib.toLower name) value))
-        (lib.mapAttrs (
-          colorName: hexcolor:
-          validateHexColor {
-            color = hexcolor;
-            name = colorName;
-          }
-        ))
+        (lib.mapAttrs' (name: value: lib.nameValuePair name (hexStringToRGB value)))
       ];
 
-    loadNamed =
+    loadNamedColors =
       source:
       lib.pipe source [
         (source: if builtins.isAttrs source then source else parseFromFile source)
         (parsed: parsed.palette or parsed)
-        # Formatting and validation
-        (lib.mapAttrs (_: toString)) # make sure the value is a string
-        (lib.mapAttrs (
-          colorName: hexcolor:
-          validateHexColor {
-            color = hexcolor;
-            name = colorName;
-          }
-        ))
+        (lib.mapAttrs' (name: value: lib.nameValuePair name (hexStringToRGB value)))
       ];
-
-    validateHexColor =
-      {
-        color,
-        name ? null,
-      }:
-      let
-        length = builtins.stringLength color;
-      in
-      if length < 7 then
-        throw "Hex color ${name} must be at least 7 characters long, got ${toString length}."
-      else if length > 7 then
-        builtins.warn "Hex color ${name} is longer than 7 characters." (builtins.substring 0 7 color)
-      else
-        color;
 
     loadMeta =
       source:
@@ -98,14 +72,14 @@ lib.makeExtensible (
     buildPalette =
       {
         colors,
-        opacity ? 1.0,
+        defaultOpacity ? 1.0,
       }:
       let
         # can be path to file or attrset of colors
-        baseColors = loadRawColors colors;
+        baseColors = loadBaseColors colors;
         builtPalette = buildNamedPalette {
           nestedColors = baseColors;
-          inherit opacity;
+          inherit defaultOpacity;
         };
       in
       {
@@ -116,55 +90,57 @@ lib.makeExtensible (
     buildNamedPalette =
       {
         nestedColors,
-        opacity ? 1.0,
+        defaultOpacity ? 1.0,
       }:
       let
-        alpha = builtins.floor (opacity * 255.0 + 0.5);
-
-        # Walk every nesting level, applying `f` to each hex string leaf.
+        # Walk every nesting level, applying `f` to each color leaf. A
+        # value of type rgb or hex (from format-conversion) is a leaf,
         walk =
           f: set:
-          lib.mapAttrs (name: value: if builtins.isAttrs value then walk f value else f name value) set;
+          lib.mapAttrs (
+            name: value:
+            let
+              isColourFormat = lib.elem (value._type or "") [
+                "rgb"
+                "hex"
+              ];
+            in
+            if builtins.isAttrs value && !isColourFormat then walk f value else f name value
+          ) set;
 
+        # Hex format
         hexTree = walk (
-          name: hex:
+          name: color:
           let
-            color = validateHexColor {
-              color = hex;
-              name = name;
-            };
-            colorRGB = hexToRGB color;
+            colorHex = convertToColorFormat "hex" color;
+            r = colorHex.r;
+            g = colorHex.g;
+            b = colorHex.b;
+            alpha = if colorHex.a != null then colorHex.a else floatOpacityToHex defaultOpacity;
           in
           {
-            normal = color;
-            withoutHash = lib.removePrefix "#" color;
-            withOpacity = RGBAToHex {
-              inherit (colorRGB) r g b;
-              a = alpha;
-            };
-            opacity = toHexByte alpha;
-            r = toHexByte colorRGB.r;
-            g = toHexByte colorRGB.g;
-            b = toHexByte colorRGB.b;
+            normal = "#${r}${g}${b}";
+            withoutHash = "${r}${g}${b}";
+            withOpacity = "#${r}${g}${b}${alpha}";
+            inherit r g b;
+            opacity = alpha;
           }
         ) nestedColors;
 
+        # RGB format
         rgbTree = walk (
-          name: hex:
+          name: color:
           let
-            color = validateHexColor {
-              color = hex;
-              name = name;
-            };
-            colorRGB = hexToRGB color;
+            colorRGB = convertToColorFormat "rgb" color;
+            alpha = if colorRGB.a != null then colorRGB.a else defaultOpacity;
           in
           {
             normal = "rgb(${toString colorRGB.r}, ${toString colorRGB.g}, ${toString colorRGB.b})";
-            withOpacity = "rgba(${toString colorRGB.r}, ${toString colorRGB.g}, ${toString colorRGB.b}, ${toString opacity})";
-            opacity = toString opacity;
+            withOpacity = "rgba(${toString colorRGB.r}, ${toString colorRGB.g}, ${toString colorRGB.b}, ${toString alpha})";
             r = colorRGB.r;
             g = colorRGB.g;
             b = colorRGB.b;
+            opacity = alpha;
           }
         ) nestedColors;
 

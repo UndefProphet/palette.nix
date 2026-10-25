@@ -6,6 +6,7 @@
 }:
 let
   palette-lib = import ./lib.nix { inherit lib pkgs; };
+  color-formats = import ./color-formats.nix { inherit lib; };
   color-mixing = import ./color-mixing.nix { inherit lib; };
   user-lib = import ./user-lib.nix { inherit lib config; };
   cfg = config.palette;
@@ -125,7 +126,7 @@ in
           value:
           palette-lib.buildNamedPalette {
             nestedColors = value;
-            opacity = cfg.opacity;
+            defaultOpacity = cfg.opacity;
           };
       };
 
@@ -237,6 +238,10 @@ in
   config = lib.mkMerge [
     {
       lib.palette = {
+        inherit (color-formats)
+          generateRGB
+          generateHex
+          ;
         inherit (color-mixing)
           linearMixRatio
           evenMix
@@ -257,7 +262,7 @@ in
         metaData = palette-lib.buildMeta cfg.colorscheme;
         paletteData = palette-lib.buildPalette {
           colors = cfg.colorscheme;
-          opacity = cfg.opacity;
+          defaultOpacity = cfg.opacity;
         };
         variant = lib.mkIf (builtins.elem metaData.variant [
           "dark"
