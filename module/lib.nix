@@ -94,7 +94,7 @@ lib.makeExtensible (
       }:
       let
         # Walk every nesting level, applying `f` to each color leaf. A
-        # value of type rgb or hex (from format-conversion) is a leaf,
+        # value of type rgb or hex is a leaf,
         walk =
           f: set:
           lib.mapAttrs (
