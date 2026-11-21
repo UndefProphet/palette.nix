@@ -119,9 +119,8 @@ lib.makeExtensible (
             alpha = if colorHex.a != null then colorHex.a else floatOpacityToHex defaultOpacity;
           in
           {
-            normal = "#${r}${g}${b}";
-            withoutHash = "${r}${g}${b}";
-            withOpacity = "#${r}${g}${b}${alpha}";
+            normal = "${r}${g}${b}";
+            withOpacity = "${r}${g}${b}${alpha}";
             inherit r g b;
             opacity = alpha;
           }
